@@ -1,0 +1,401 @@
+# CYBERLAB — FINAL DASHBOARD LAYOUT AND NAVIGATION REDESIGN
+
+You are a senior frontend engineer, application UX architect, and product designer.
+
+We have an EXISTING, FUNCTIONING CyberLab application with:
+
+- Integrated TypeScript simulation engine.
+- React frontend.
+- Sandbox and Challenge modes.
+- Network infrastructure visualization.
+- Nova Store fictional website preview.
+- Configuration controls.
+- Resource analytics.
+- Cyber Tutor and potentially Gemini-powered RAG integration.
+- Mobbin-inspired UI styling.
+
+## THE PROBLEM
+
+The current user experience is unacceptable.
+
+The UI feels congested, confusing, and difficult for beginners to navigate.
+
+The most serious issue is that the Nova Store preview appears near the top of the webpage while the controls are far below.
+
+Users must scroll between them.
+
+They cannot observe the effects of their actions in real time.
+
+This defeats the purpose of our interactive learning application.
+
+**YOUR PRIMARY OBJECTIVE IS TO FIX INFORMATION ARCHITECTURE, SCREEN LAYOUT, AND NAVIGATION.**
+
+Do not merely change colors, spacing, or typography.
+
+Reorganize the application into a clear, purposeful dashboard with multiple navigable sections.
+
+## 1. FIRST INSPECT THE EXISTING CODE
+
+Read:
+
+- `DESIGN-mobbin.md`
+- Existing App.tsx
+- Existing layout and navigation components
+- Simulation controls
+- Network canvas
+- Nova Store preview
+- Sandbox and Challenge implementation
+- Analytics components
+- Cyber Tutor
+
+Identify which components are currently causing excessive page height and confusing navigation.
+
+Provide a very short implementation plan, then proceed.
+
+Preserve the existing functionality.
+
+## 2. MANDATORY MAIN WORKSPACE LAYOUT
+
+Implement a desktop-first, three-column interactive workspace.
+
+**LEFT PANEL — Controls**
+
+Contains:
+
+- Legitimate traffic adjustment.
+- Simulated excessive traffic adjustment.
+- Attack scenario selection.
+- Rate limiter controls.
+- Load-balancer controls.
+- Server configuration.
+- Drag-and-drop infrastructure tools.
+
+Use progressive disclosure to avoid overwhelming the student.
+
+Show only essential controls initially.
+
+Place advanced configuration inside expandable sections.
+
+**CENTER PANEL — Network Infrastructure**
+
+Contains:
+
+- Interactive network diagram.
+- Traffic paths.
+- Defensive components.
+- Server nodes.
+- Infrastructure drag-and-drop slots.
+- Visual traffic indicators.
+
+This should be a large, interactive workspace.
+
+**RIGHT PANEL — Live Nova Store**
+
+Contains:
+
+- Fictional storefront.
+- Current service condition.
+- Product previews.
+- Refresh/Retry action.
+- Loading/failure states linked to simulation metrics.
+
+The Nova Store preview must remain visible while users modify controls.
+
+### CRITICAL LAYOUT REQUIREMENTS
+
+On desktop screens:
+
+- Controls, network, and Nova Store must be visible simultaneously.
+- The three panels must occupy the same primary viewport area.
+- The page should not require vertical scrolling to see the controls and preview together.
+- Use available viewport height after accounting for the header.
+- Make long panels scroll internally if necessary.
+- Do not put controls below the main workspace.
+- Do not stack the three columns on normal desktop widths.
+- Ensure the website preview receives sufficient width to remain readable.
+- Keep Run/Pause/Step/Reset accessible without scrolling.
+
+Consider CSS Grid or Flexbox with an application shell using `height: 100dvh` and `min-height: 0` where appropriate.
+
+Avoid nested scrolling wherever possible, but prioritize keeping the experiment visible.
+
+### RESPONSIVENESS
+
+On narrower displays, use a clearly designed panel switcher or collapsible controls rather than squeezing everything into unreadable columns.
+
+Desktop is our priority for the hackathon demo.
+
+## 3. CREATE CLEAR TOP-LEVEL NAVIGATION
+
+Introduce a persistent, modern application header with:
+
+**Workspace | Challenges | Analytics | Learn**
+
+Also include:
+
+- CyberLab branding.
+- Current simulation status.
+- Help button.
+- Cyber Tutor button.
+
+Use the Mobbin-inspired pill navigation style.
+
+Every section must have a clear title and purpose.
+
+Do not create fake or empty navigation destinations.
+
+### WORKSPACE
+
+The primary interactive laboratory.
+
+Contains the three-column layout.
+
+This is the default screen.
+
+### CHALLENGES
+
+A dedicated section for interactive incidents.
+
+Display the existing Midnight Outage challenge with:
+
+- Clear briefing.
+- Objectives.
+- Start/Retry actions.
+- Challenge progress.
+
+When the student begins the incident, use the SAME interactive workspace layout with the challenge scenario loaded.
+
+Do not create a separate simulator.
+
+Show challenge status clearly in the shared workspace.
+
+### ANALYTICS
+
+Move detailed technical information here:
+
+- CPU.
+- Bandwidth.
+- Connection utilization.
+- Request queue.
+- Incoming/served/blocked/dropped traffic.
+- Historical traffic chart.
+- Latency.
+- Availability.
+
+Present this information in readable groups with simple descriptions.
+
+All metrics must come from the real simulation engine.
+
+### LEARN
+
+Create a concise educational reference section containing beginner-friendly explanations of:
+
+- Servers.
+- Bandwidth.
+- CPU.
+- Requests.
+- Denial of service.
+- Rate limiting.
+- Load balancing.
+- Connection slots.
+- Queues.
+- Latency.
+
+Use clean cards and brief examples.
+
+This section should support the experiment rather than feel like a separate textbook.
+
+Where possible, include actions such as "Explore in Workspace" that return the student to a relevant experiment.
+
+Do not implement a complex course system.
+
+### CYBER TUTOR
+
+Keep the existing tutor accessible as a side drawer or overlay.
+
+It should be accessible from any primary section.
+
+Preserve existing Gemini/RAG integration if present.
+
+Do not rewrite or break its API connection.
+
+When opened from the Workspace, it should receive the current simulation context.
+
+## 4. SIMULATION CONTROLS MUST REMAIN ACCESSIBLE
+
+Keep Run, Pause, Step, and Reset within a persistent control area near the workspace header.
+
+They must never be buried in a bottom panel.
+
+Preserve their existing behavior.
+
+Changing traffic or infrastructure must immediately update configuration.
+
+Metrics must respond when the simulation advances.
+
+Do not introduce duplicate timers or competing simulation state.
+
+## 5. IMPROVE INFORMATION HIERARCHY
+
+Every section should answer one question:
+
+**Workspace:** What can I change, and what happens?
+
+**Challenges:** What problem should I solve?
+
+**Analytics:** Why is the service behaving this way?
+
+**Learn:** What do these concepts mean?
+
+**Cyber Tutor:** Can you explain my current situation? Clickable icon at bottom left corner.
+
+Remove unnecessary duplicate headings, explanatory paragraphs, oversized cards, repeated controls, and redundant metric displays.
+
+The interface should remain clean and spacious.
+
+A beginner should be able to understand how to start within ten seconds.
+
+Use plain-language labels.
+
+For example:
+
+- "Real visitors" with "Legitimate traffic" as the secondary technical label.
+- "Excess traffic" for simulated attack intensity.
+- "Protect traffic" for rate limiting.
+- "Share server workload" for load balancing.
+- "Website availability" for legitimate-user availability.
+
+Preserve technical terminology in tooltips and the Learn section.
+
+## 6. CONTEXTUAL FEEDBACK
+
+Maintain the cause-and-effect improvements from the previous redesign.
+
+When a student changes a setting:
+
+1. The configuration changes.
+2. The real simulation advances.
+3. The network responds.
+4. Nova Store responds.
+5. A compact explanation appears when appropriate.
+
+Do not hardcode improvements.
+
+Do not show fake successful outcomes.
+
+If the simulation is paused, tell the student to resume or step forward to observe changes.
+
+Keep feedback within the visible Workspace rather than inserting large blocks that push the layout downward.
+
+## 7. PRESERVE DESIGN-mobbin.md
+
+Read and follow `DESIGN-mobbin.md`.
+
+Keep:
+
+- White canvas.
+- Near-black typography.
+- Soft neutral surfaces.
+- Pill-shaped navigation and buttons.
+- 24px card corners.
+- 16px smaller elements.
+- Subtle hairline borders.
+- Generous but controlled spacing.
+- Inter or another licensed fallback to Saans.
+
+Avoid returning to the previous navy/neon cyberpunk theme.
+
+Use semantic traffic and status colors sparingly, only where necessary.
+
+Design the interface as a polished application, not a marketing website.
+
+Adapt the reference's spacing to the density of a functional desktop workspace.
+
+## 8. TECHNICAL SAFETY
+
+Do NOT modify:
+
+- `src/engine/`
+- `src/shared/simulationTypes.ts`
+- `MODEL.md`
+
+Do not replace the real engine with mock values.
+
+Do not rebuild the application from scratch.
+
+Do not remove the existing Nova Store preview or network canvas.
+
+Do not remove working controls or analytics.
+
+Do not break the Cyber Tutor API or RAG pipeline if present.
+
+Do not create login, signup, database, or deployment features.
+
+Keep all simulations browser-local and educational.
+
+## 9. IMPLEMENTATION ORDER
+
+### Phase A — Layout fix
+
+First, fix the Workspace so controls, network, and Nova Store are visible simultaneously.
+
+Do not proceed until the desktop layout works.
+
+### Phase B — Navigation
+
+Create the persistent header and separate sections:
+
+Workspace, Challenges, Analytics, Learn.
+
+Preserve simulation state while navigating.
+
+### Phase C — Clarity
+
+Simplify labels, remove redundant content, group controls logically, and improve onboarding.
+
+### Phase D — Polish
+
+Refine visual spacing, typography, responsive behavior, and micro-interactions.
+
+Do not add unnecessary features.
+
+## 10. VERIFICATION
+
+After implementation, test:
+
+1. Controls and Nova Store are visible simultaneously on desktop.
+2. Workspace fits within the viewport at 1920×1080.
+3. Workspace also remains usable at 1366×768.
+4. Changing traffic updates real simulation metrics.
+5. Nova Store reflects the real engine.
+6. Drag-and-drop infrastructure controls work.
+7. Run/Pause/Step/Reset remain visible and functional.
+8. Header navigation works.
+9. Switching sections preserves simulation state.
+10. Challenge Mode still works.
+11. Analytics displays live data.
+12. Learn section navigation works.
+13. Cyber Tutor remains functional.
+14. Gemini/RAG integration remains functional if present.
+15. No mock engine replaces the integrated engine.
+16. No TypeScript or build errors.
+17. No horizontal overflow at desktop resolutions.
+18. No engine or shared contract modifications.
+
+Run available checks and report actual results.
+
+Fix regressions before adding cosmetic polish.
+
+## FINAL OBJECTIVE
+
+Transform CyberLab into a clean, navigable, professional educational application.
+
+The primary Workspace must let students **control the simulation, observe the infrastructure, and experience the consequences on Nova Store simultaneously**.
+
+Use proper top-level navigation to separate experimentation, challenges, analytics, and learning.
+
+Keep the interface beginner-friendly without sacrificing functionality.
+
+Preserve all existing engine behavior, simulation data, and integrations.
+
+**This is an information architecture and usability redesign—not another visual reskin. Begin implementation now.**

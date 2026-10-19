@@ -45,7 +45,7 @@ export function createChatServer({ apiKey = process.env.GEMINI_API_KEY, model = 
     let timer;
     try {
       const run = generate ?? (data => generateGemini(data,apiKey,model));
-      const answer = await Promise.race([run({...input,passages}), new Promise((_,reject) => { timer = setTimeout(() => reject(new Error('timeout')),16000); })]);
+      const answer = await Promise.race([run({...input,passages}), new Promise((_,reject) => { timer = setTimeout(() => reject(new Error('timeout')),32000); })]);
       if (typeof answer !== 'string' || !answer.trim()) throw new Error('empty');
       const text = answer.slice(0,6000);
       if (!generate) liveVerified = true;
