@@ -1,36 +1,38 @@
+export type AttackType = "none" | "volume" | "syn";
+
+export type SystemStatus =
+  | "normal"
+  | "degraded"
+  | "down";
 
 export interface SimulationConfig {
-  normalRps: number;
-  surgeRps: number;
-
-  serverCapacityRps: number;
-  serverCount: number;
-  queueCapacity: number;
-
-  rateLimitEnabled: boolean;
+  legitRate: number;
+  attackType: AttackType;
+  attackRate: number;
   filterStrength: number;
-  balancerEnabled: boolean;
+  loadBalancer: boolean;
+  serverCount: number;
+  perServerCapacity: number;
+  perServerBandwidth: number;
+  perServerConnections: number;
+  perServerQueue: number;
 }
 
 export interface SimulationMetrics {
   incoming: number;
   blocked: number;
-
-  servedNormal: number;
-  servedSurge: number;
-
-  droppedNormal: number;
-  droppedSurge: number;
-
+  legitServed: number;
+  attackServed: number;
+  legitDropped: number;
+  attackDropped: number;
   queueDepth: number;
-
-  cpuPct: number;
-  bandwidthPct: number;
-  connectionPct: number;
-  queuePct: number;
-
+  cpuPercent: number;
+  bandwidthPercent: number;
+  connectionPercent: number;
+  queuePercent: number;
   latencyMs: number;
-  availabilityPct: number;
+  legitAvailabilityPercent: number;
+  status: SystemStatus;
 }
 
 export interface SimulationSnapshot
@@ -40,6 +42,9 @@ export interface SimulationSnapshot
 
 export interface SimulationState {
   tick: number;
+  queueLegit: number;
+  queueAttack: number;
+  halfOpen: number;
   metrics: SimulationMetrics;
   history: SimulationSnapshot[];
 }
