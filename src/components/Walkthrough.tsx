@@ -5,7 +5,7 @@ export const tourSteps = [
   { target: 'network', title: 'Meet your network.', text: 'Follow the paths from traffic sources through your defenses to the server pool. Green is legitimate traffic, red is simulated excess. The flow pauses when the simulation pauses.' },
   { target: 'traffic', title: 'Turn up the traffic.', text: 'Increase surge traffic to create a volume overload. Slider changes affect the next tick. Run advances one second at a time; Step lets you inspect a single second.' },
   { target: 'defenses', title: 'Build a better defense.', text: 'Drag a rate limiter or load balancer onto its matching network slot. You can also click to add. Extra servers need a load balancer to share incoming work.' },
-  { target: 'metrics', title: 'Ask why. Try again.', text: 'The Inspector holds your resource meters, full history, and advanced settings. “Why is this happening?” opens your contextual guide. When you’re ready, investigate The Midnight Outage.' },
+  { target: 'metrics', title: 'Ask why. Try again.', text: 'Analytics holds your resource meters and full history. Advanced server settings stay in the Controls panel. “Why is this happening?” opens your contextual guide. When you’re ready, investigate The Midnight Outage.' },
 ];
 
 export function Walkthrough({ step, onStep, onClose }: { step: number | 'welcome' | null; onStep: (step: number) => void; onClose: () => void }) {

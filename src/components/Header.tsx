@@ -1,16 +1,12 @@
-import { CircleHelp, FlaskConical, Moon, Sun, Pause, Play, RotateCcw, ShieldCheck, SkipForward } from 'lucide-react';
+import { CircleHelp, FlaskConical, MessageCircle, Moon, Sun, Pause, Play, RotateCcw, ShieldCheck, SkipForward } from 'lucide-react';
 import { useState } from 'react';
-import type { Mode } from '../hooks/useSimulation';
 import type { SimulationMetrics } from '../shared/simulationTypes';
 import { systemStatus } from '../lib/learning';
 
-interface Props {
-  mode: Mode; metrics: SimulationMetrics; running: boolean; locked: boolean; started: boolean;
-  onMode: (mode: Mode) => void; onToggle: () => void; onStep: () => void;
-  onReset: () => void; onHelp: () => void;
-}
+export type Section = 'workspace' | 'challenges' | 'analytics' | 'learn';
+interface Props { section: Section; metrics: SimulationMetrics; started: boolean; onNavigate: (section: Section) => void; onHelp: () => void; onTutor: () => void }
 
-export function Header({ mode, metrics, started, onMode, onHelp }: Props) {
+export function Header({ section, metrics, started, onNavigate, onHelp, onTutor }: Props) {
   const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark');
   function toggleTheme() {
     const next = !dark;
@@ -22,8 +18,8 @@ export function Header({ mode, metrics, started, onMode, onHelp }: Props) {
   const status = systemStatus(metrics);
   return <div className="header-wrap"><header className="app-header">
     <a className="brand" href="#main" aria-label="CyberLab workspace"><span className="brand-mark"><FlaskConical size={22} strokeWidth={1.8} /></span><span>CyberLab<span className="brand-dot">.</span></span></a>
-    <nav className="mode-tabs" aria-label="Lab mode"><button className={mode === 'sandbox' ? 'active' : ''} aria-current={mode === 'sandbox' ? 'page' : undefined} onClick={() => onMode('sandbox')}>Sandbox</button><button className={mode === 'challenge' ? 'active' : ''} aria-current={mode === 'challenge' ? 'page' : undefined} onClick={() => onMode('challenge')}>Challenges</button></nav>
-    <div className="header-actions"><span className={`status-pill ${started ? status.tone : 'muted'}`}><i />{started ? status.label : 'Awaiting investigation'}</span><button className="theme-toggle icon-button" onClick={toggleTheme} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} aria-pressed={dark} title={dark ? 'Switch to light mode' : 'Switch to dark mode'}>{dark ? <Sun size={18} /> : <Moon size={18} />}</button><button className="help-button" onClick={onHelp} aria-label="Open walkthrough"><CircleHelp size={17} /><span>Help</span></button></div>
+    <nav className="mode-tabs" aria-label="Primary navigation">{(['workspace','challenges','analytics','learn'] as const).map(item=><button key={item} className={section === item ? 'active' : ''} aria-current={section === item ? 'page' : undefined} onClick={()=>onNavigate(item)}>{item[0].toUpperCase()+item.slice(1)}</button>)}</nav>
+    <div className="header-actions"><span className={`status-pill ${started ? status.tone : 'muted'}`}><i />{started ? status.label : 'Awaiting investigation'}</span><button className="help-button" onClick={onTutor}><MessageCircle size={17}/><span>Cyber Tutor</span></button><button className="theme-toggle icon-button" onClick={toggleTheme} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} aria-pressed={dark} title={dark ? 'Switch to light mode' : 'Switch to dark mode'}>{dark ? <Sun size={18} /> : <Moon size={18} />}</button><button className="help-button" onClick={onHelp} aria-label="Open walkthrough"><CircleHelp size={17} /><span>Help</span></button></div>
   </header></div>;
 }
 
