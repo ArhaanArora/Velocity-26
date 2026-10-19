@@ -43,7 +43,7 @@ function reducer(lab: LabState, action: Action): LabState {
       return { ...lab, mode: action.mode, [mode]: { ...current, running: false } };
     case 'config':
       // Challenge source rates stay fixed; infrastructure remains configurable.
-      if (mode === 'challenge' && ('normalRps' in action.patch || 'surgeRps' in action.patch)) return lab;
+      if (mode === 'challenge' && ('legitRate' in action.patch || 'attackRate' in action.patch || 'attackType' in action.patch)) return lab;
       if (!current.started || current.completedAt !== null) return lab;
       next = { ...current, config: { ...current.config, ...action.patch } };
       break;
@@ -54,9 +54,9 @@ function reducer(lab: LabState, action: Action): LabState {
     case 'tick': {
       if (action.mode !== mode || !current.started || current.completedAt !== null || (action.manual ? current.running : !current.running)) return lab;
       const state = simulationEngine.stepSimulation(current.config, current.state);
-      const stableTicks = mode === 'challenge' ? advanceStability(current.stableTicks, state.metrics.availabilityPct) : 0;
+      const stableTicks = mode === 'challenge' ? advanceStability(current.stableTicks, state.metrics.legitAvailabilityPercent) : 0;
       const completedAt = mode === 'challenge' && stableTicks >= STABLE_TARGET ? state.tick : null;
-      next = { ...current, state, appliedConfig: { ...current.config }, stableTicks, completedAt, running: completedAt === null && current.running, filterUsed: current.filterUsed || current.config.rateLimitEnabled, balancerUsed: current.balancerUsed || current.config.balancerEnabled, maxServers: Math.max(current.maxServers, current.config.serverCount) };
+      next = { ...current, state, appliedConfig: { ...current.config }, stableTicks, completedAt, running: completedAt === null && current.running, filterUsed: current.filterUsed || (current.config.filterStrength > 0), balancerUsed: current.balancerUsed || current.config.loadBalancer, maxServers: Math.max(current.maxServers, current.config.serverCount) };
       break;
     }
     case 'reset': next = createSession(mode); break;

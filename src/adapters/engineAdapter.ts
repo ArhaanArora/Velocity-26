@@ -1,3 +1,7 @@
-// Integration boundary: switch this export to '../engine' once Agam's engine
-// implements the checked-in shared contract. UI consumers need no other change.
-export { simulationEngine } from '../mocks/mockEngine';
+// Production integration boundary. Engine errors surface without a mock fallback.
+export {
+  simulationEngine,
+  normalTrafficPreset,
+  trafficSurgePreset,
+  midnightOutagePreset,
+} from '../engine';

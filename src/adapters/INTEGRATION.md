@@ -1,37 +1,56 @@
 # CyberLab frontend integration
 
-The frontend runs with no `src/engine/` directory. Its only simulation import is
-`simulationEngine` from `src/adapters/engineAdapter.ts`. Presets currently live in
-`src/lib/presets.ts` and use the checked-in shared contract.
+The production adapter re-exports `simulationEngine` and all three presets from
+Agam's `src/engine/index.ts`. The frontend preset module is now only a re-export.
+There is no automatic mock fallback and no competing simulation state.
 
-To integrate an engine that implements that exact contract, replace the adapter
-export with `export { simulationEngine } from '../engine';`. Replace the temporary
-presets with the engine's compatible presets. Run `npm test` and `npm run build`,
-then verify normal traffic, overload, filtering, balancing, and the challenge.
+## Shared contract
 
-## Contract difference requiring coordination
+The frontend consumes the current shared types directly: `legitRate`,
+`attackType`, `attackRate`, `filterStrength`, `loadBalancer`, `serverCount`, and
+all four `perServer*` capacities. The limiter is enabled by `filterStrength > 0`;
+removing it sets strength to zero. Balancing activates the configured servers.
 
-The master prompt and MODEL.md describe a richer engine than the checked-in
-`src/shared/simulationTypes.ts`. This frontend preserves the actual file exactly:
+Meters and charts use the engine's `*Percent`, `legitServed`, `attackServed`,
+`legitDropped`, `attackDropped`, latency, and history. Status labels map the
+engine's `status`; the frontend does not recalculate status from availability.
+The SYN view exposes the returned `halfOpen` count. At tick zero, metrics and
+history are empty, exactly as returned by the engine.
 
-- Config: `normalRps`, `surgeRps`, `serverCapacityRps`, `serverCount`,
-  `queueCapacity`, `rateLimitEnabled`, `filterStrength`, `balancerEnabled`.
-- Metrics: `servedNormal`, `servedSurge`, `droppedNormal`, `droppedSurge`,
-  `cpuPct`, `bandwidthPct`, `connectionPct`, `queuePct`, `availabilityPct`,
-  `incoming`, `blocked`, `queueDepth`, `latencyMs`.
-- State: `tick`, `metrics`, `history` only. No per-source queues or half-open state.
-- No attack-type field, SYN mode, editable bandwidth/connection limits, or status.
+Configuration edits do not step time. Metrics, source labels, and tutor answers
+retain the last applied configuration until Run or Step advances the engine.
+Network infrastructure shows the current configuration with a pending notice.
+There is one timer, and switching modes pauses the inactive session. The
+challenge locks incident traffic and requires 15 advancing ticks at >=85%
+legitimate availability; a failing tick resets that consecutive counter.
 
-The UI derives Operational/Degraded/Disrupted status at 90%/50% availability.
-Bandwidth and connections in the mock are explicitly labeled normalized estimates.
-The mock proportionally splits total backlog by current passing demand because
-the contract cannot retain queue composition. Tick zero is a load preview.
+## Educational model limits
 
-The engine team must resolve the difference between MODEL.md and the shared
-contract before integration. Neither protected file was changed for this task.
+Bandwidth is utilization against configured requests/s, not a processing cap.
+Connection slots are occupied by queued requests and half-open SYN connections.
+SYN traffic reduces queue room but does not directly block immediate processing.
+These are engine behaviors, reflected in the tutor and integration checks.
+Filtering uses integer-rounded collateral losses, including for small rates.
+High resource pressure or a degraded engine status still produces a warning
+when the challenge's availability target is met.
 
-## Run locally
+## Development fallback
 
-`npm install`, then `npm run dev`. `npm test` runs mock and learning-rule checks;
-`npm run build` runs TypeScript and produces a production bundle in `dist/`.
-All assets and simulation logic are local. No accounts, external APIs, or backend.
+`src/mocks/mockEngine.ts` remains a standalone, contract-compatible deterministic
+development mock. To opt in, explicitly change the adapter's engine export to
+that file. The default adapter and all UI sessions use the real engine.
+
+## Run and verify
+
+- `npm run dev`: local development server.
+- `npm run typecheck`: TypeScript validation, including imported engine modules.
+- `npm test`: real-engine integration, learning, and mock tests plus the engine's
+  existing 10-area test runner. Vite bundles TypeScript test entries into a
+  temporary folder so extensionless engine imports run without new dependencies
+  or edits to the protected engine files. Failed legacy engine results also
+  return a nonzero exit code.
+- `npm run build`: typecheck and production bundle in `dist/`.
+- `npm run preview`: serve the production bundle locally.
+
+Integration does not modify `src/engine/`, the shared contract, or `MODEL.md`.
+No external AI, accounts, network traffic generation, or backend is used.

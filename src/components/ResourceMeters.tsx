@@ -3,10 +3,10 @@ import type { SimulationMetrics } from '../shared/simulationTypes';
 
 export function ResourceMeters({ metrics }: { metrics: SimulationMetrics }) {
   const resources = [
-    { label: 'CPU', value: metrics.cpuPct, icon: Cpu, detail: 'Processing utilization' },
-    { label: 'Bandwidth', value: metrics.bandwidthPct, icon: Radio, detail: 'Normalized load estimate' },
-    { label: 'Connections', value: metrics.connectionPct, icon: Cable, detail: 'Normalized load estimate' },
-    { label: 'Request queue', value: metrics.queuePct, icon: Layers3, detail: `${metrics.queueDepth} requests waiting` },
+    { label: 'CPU', value: metrics.cpuPercent, icon: Cpu, detail: 'Processing utilization' },
+    { label: 'Bandwidth', value: metrics.bandwidthPercent, icon: Radio, detail: 'Passed traffic / bandwidth capacity' },
+    { label: 'Connections', value: metrics.connectionPercent, icon: Cable, detail: 'Half-open connections + queued requests' },
+    { label: 'Request queue', value: metrics.queuePercent, icon: Layers3, detail: `${metrics.queueDepth} requests waiting` },
   ];
   const pressure = resources.find(resource => resource.value >= 90);
   return <section className="panel resources-panel" aria-label="System resources" data-tour="metrics">

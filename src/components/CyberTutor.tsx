@@ -40,7 +40,7 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
   }
   return <aside className="tutor-drawer" aria-label="Cyber Tutor" onKeyDown={event => { if (event.key === 'Escape') onClose(); }}>
     <div className="tutor-drawer-heading"><span className="tutor-avatar"><Bot size={23} /></span><div><h2>Cyber Tutor</h2><span><i className="status-dot healthy" /> Connected to your {mode}</span></div><button className="icon-button" onClick={onClose} aria-label="Close Cyber Tutor"><X size={19} /></button></div>
-    <div className="tutor-context"><span>LIVE CONTEXT</span><b>{metrics.availabilityPct.toFixed(0)}% availability</b><span>Tick {tick}</span></div>
+    <div className="tutor-context"><span>LIVE CONTEXT</span><b>{metrics.legitAvailabilityPercent.toFixed(0)}% availability</b><span>Tick {tick}</span></div>
     <div className="tutor-conversation">
       <div className="tutor-welcome"><Sparkles size={23} /><h3>Let’s make sense of it.</h3><p>I explain your current configuration and metrics using built-in learning rules. Answers are snapshots of the tick when you ask.</p></div>
       <div className="question-chips">{(mode === 'challenge' ? ['Give me a hint', 'Why is my server struggling?', 'Why is the queue full?'] : suggestedQuestions).map(text => <button key={text} onClick={() => ask(text)}>{text}<ArrowRight size={12} /></button>)}</div>
