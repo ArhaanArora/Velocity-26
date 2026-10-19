@@ -4,6 +4,7 @@ import { Header, SimulationControls, type Section } from './components/Header';
 import { Sidebar, type ComponentKind } from './components/Sidebar';
 import { NetworkCanvas } from './components/NetworkCanvas';
 import { NovaStore } from './components/NovaStore';
+import { PanelDivider } from './components/PanelDivider';
 import { OutcomePanel } from './components/OutcomePanel';
 import { AnalyticsPage, LearnPage } from './components/ReferencePages';
 import { CyberTutor } from './components/CyberTutor';
@@ -59,6 +60,7 @@ export default function App() {
       <div className="desktop-toolbar"><div><h1>{section === 'workspace' ? mode === 'sandbox' ? 'Workspace' : 'Midnight Outage' : section[0].toUpperCase()+section.slice(1)}</h1><span>{mode === 'sandbox' ? 'Sandbox / Nova Store' : 'Challenge / Nova Store'}</span>{mode==='challenge' && <button className="text-button" onClick={()=>changeMode('sandbox')}>Return to Sandbox</button>}</div><SimulationControls running={running} locked={locked} tick={state.tick} onToggle={toggleRunning} onStep={step} onReset={resetSession}/></div>
       {section === 'workspace' && <div className="desktop-workspace">
         <Sidebar config={config} mode={mode} disabled={locked} selected={selected} onConfig={changeConfig} onPreset={applyPreset} onAdd={addComponent} onSelect={setSelected}/>
+        <PanelDivider index={0}/>
         <section className="network-workspace" aria-label="Infrastructure workspace">
           {mode === 'challenge' && <ChallengePanel session={session} onStart={beginIncident} onHint={openTutor}/>}
           {session.started ? <NetworkCanvas onConfig={changeConfig} trafficLocked={mode === 'challenge'} config={config} appliedConfig={session.appliedConfig} metrics={state.metrics} halfOpen={state.halfOpen} tick={state.tick} running={running} disabled={locked} selected={selected} onSelect={setSelected} onAdd={addComponent} onRemove={removeComponent}/> : <div className="network-standby" data-tour="network"><ShieldCheck size={28}/><h3>Follow the evidence.</h3><p>Start the incident to reveal your network.</p></div>}
@@ -66,6 +68,7 @@ export default function App() {
           <button className="button button-secondary analytics-shortcut" onClick={()=>setSection('analytics')}>Inspect system / Analytics</button>
           {mode === 'challenge' && session.completedAt !== null && !completionDismissed && <div className="workspace-completion"><CompletionSummary session={session} onRetry={resetSession} onSandbox={()=>changeMode('sandbox')} onClose={()=>setCompletionDismissed(true)}/></div>}
         </section>
+        <PanelDivider index={1}/>
         <section className="live-store-column" aria-label="Live customer experience"><div className="live-store-status"><div><span>Website availability</span><strong>{session.started ? `${state.metrics.legitAvailabilityPercent.toFixed(1)}%` : 'Not started'}</strong></div><span>{session.started ? state.tick === 0 ? 'Ready for first tick' : state.metrics.status === 'normal' ? 'Service operational' : state.metrics.status === 'down' ? 'Service unavailable' : 'Service degraded' : 'Awaiting investigation'}</span></div><NovaStore key={mode} state={state} awaitingIncident={mode==='challenge' && !session.started}/></section>
       </div>}
       {section === 'challenges' && <section className="reference-page challenges-page"><div className="page-heading"><h1>The Midnight Outage.</h1><p>What problem should you solve? Investigate failed page loads and restore Nova Store.</p></div><ChallengePanel session={session} onStart={beginIncident} onHint={openTutor}/>{session.started && <div className="challenge-actions"><button className="button button-primary" onClick={()=>setSection('workspace')}>Open incident workspace</button><button className="button button-secondary" onClick={resetSession}>Retry incident</button></div>}{session.completedAt !== null && <CompletionSummary session={session} onRetry={resetSession} onSandbox={()=>changeMode('sandbox')} onClose={()=>setSection('workspace')}/>}<div className="challenge-objective"><h2>Your objective</h2><p>Keep legitimate availability at or above 85% for 15 consecutive simulated seconds. Use the network and Analytics to discover the cause. Changing sections preserves your experiment.</p></div></section>}

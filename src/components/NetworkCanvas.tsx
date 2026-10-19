@@ -13,7 +13,7 @@ interface Props {
 }
 interface LayoutNode extends SimulationNodeDatum { id: string; ax: number; ay: number }
 interface LayoutLink extends SimulationLinkDatum<LayoutNode> { id: string }
-const W=800,H=560,NW=118,NH=82;
+const W=800,H=560,NW=168,NH=124;
 const clampX=(x:number)=>Math.max(NW/2+8,Math.min(W-NW/2-8,x));
 const clampY=(y:number)=>Math.max(NH/2+8,Math.min(H-NH/2-8,y));
 
@@ -27,6 +27,8 @@ export function NetworkCanvas({config,appliedConfig,metrics,halfOpen,running,tic
   const [selection,setSelection]=useState<string|null>(null);
   const [notice,setNotice]=useState('Drag a tool into a matching slot. Drag installed nodes to rearrange.');
   const count=config.serverCount;
+  const compact=count<=2;
+  const viewBox=compact?'0 70 800 420':`0 0 ${W} ${H}`;
   const ids=['users','excess','filter','balancer',...Array.from({length:count},(_,i)=>`server-${i}`)];
   function paint() {
     const svg=svgRef.current;if(!svg)return;
@@ -38,13 +40,13 @@ export function NetworkCanvas({config,appliedConfig,metrics,halfOpen,running,tic
     const nodes=ids.map(id=>{
       const index=Number(id.split('-')[1]);
       const ax=id==='users'||id==='excess'?80:id==='filter'?290:id==='balancer'?470:count>3?590+(index%2)*130:710;
-      const ay=id==='users'?170:id==='excess'?390:id==='filter'||id==='balancer'?280:count===1?280:count>3?90+Math.floor(index/2)*(380/(Math.ceil(count/2)-1)):65+index*(430/(count-1));
+      const ay=id==='users'?170:id==='excess'?390:id==='filter'||id==='balancer'?280:count===1?280:count>3?90+Math.floor(index/2)*(380/(Math.ceil(count/2)-1)):135+index*(290/(count-1));
       return {...previous.get(id),id,ax,ay,x:previous.get(id)?.x??ax,y:previous.get(id)?.y??ay};
     });
     const links:LayoutLink[]=[{id:'users-filter',source:'users',target:'filter'},{id:'excess-filter',source:'excess',target:'filter'},{id:'filter-balancer',source:'filter',target:'balancer'},...Array.from({length:count},(_,i)=>({id:`balancer-server-${i}`,source:'balancer',target:`server-${i}`}))];
     nodesRef.current=nodes;linksRef.current=links;
     const sim=simulation.current??forceSimulation<LayoutNode,LayoutLink>().stop();simulation.current=sim;
-    sim.nodes(nodes).force('links',forceLink<LayoutNode,LayoutLink>(links).id(node=>node.id).distance(190).strength(.08)).force('charge',forceManyBody().strength(-260)).force('collision',forceCollide<LayoutNode>(74).strength(.85)).force('columns',forceX<LayoutNode>(node=>node.ax).strength(.5)).force('rows',forceY<LayoutNode>(node=>node.ay).strength(.35)).velocityDecay(.6).alphaDecay(.045).on('tick',()=>{if(!frame.current)frame.current=requestAnimationFrame(()=>{frame.current=0;paint();});});
+    sim.nodes(nodes).force('links',forceLink<LayoutNode,LayoutLink>(links).id(node=>node.id).distance(190).strength(.08)).force('charge',forceManyBody().strength(-260)).force('collision',forceCollide<LayoutNode>(94).strength(.85)).force('columns',forceX<LayoutNode>(node=>node.ax).strength(.5)).force('rows',forceY<LayoutNode>(node=>node.ay).strength(.35)).velocityDecay(.6).alphaDecay(.045).on('tick',()=>{if(!frame.current)frame.current=requestAnimationFrame(()=>{frame.current=0;paint();});});
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){sim.alpha(1).stop().tick(100);paint();}else{sim.alpha(.7).restart();paint();}
     // Metrics do not rebuild or reheat physics; only a topology change does.
   },[count]);
@@ -61,15 +63,15 @@ export function NetworkCanvas({config,appliedConfig,metrics,halfOpen,running,tic
   const serverLinks=Array.from({length:count},(_,i)=>`balancer-server-${i}`);
   return <section className="panel network-panel force-panel" data-tour="network" aria-label="Live network topology">
     <div className="panel-heading"><div><span className="section-eyebrow"><Network size={15}/> Interactive infrastructure</span><h2>Your network <span className="live-indicator">{running?'Running':'Paused'}</span></h2></div><button className="icon-button" onClick={resetLayout} aria-label="Reset Layout" title="Reset Layout"><RotateCcw size={17}/></button></div>
-    <div className="force-stage"><svg ref={svgRef} className="force-svg" viewBox={`0 0 ${W} ${H}`} data-running={running} aria-label="Draggable network; use node buttons for configuration">
+    <div className="force-stage"><svg ref={svgRef} className="force-svg" style={{ minHeight: compact ? 300 : 364 }} viewBox={viewBox} data-running={running} aria-label="Draggable network; use node buttons for configuration">
       <rect x="638" y="12" width="152" height="536" rx="24" className="server-drop-zone" {...dropProps('server')}/>
       {['users-filter','excess-filter','filter-balancer',...serverLinks].map(id=><path key={id} data-layout-link={id} className={`force-link ${id==='users-filter'&&metrics.legitServed>0?'served-link':id==='excess-filter'&&tick>0&&appliedConfig.attackType!=='none'?'excess-link':id.startsWith('balancer-server-')&&id!=='balancer-server-0'&&!config.loadBalancer?'idle-link':metrics.cpuPercent>=95&&id==='filter-balancer'?'congested-link':''} ${running&&metrics.incoming>0?'moving-link':''}`}/>)}
       {ids.map(id=>{const isServer=id.startsWith('server');const index=isServer?Number(id.split('-')[1]):0;const kind:ComponentKind|null=id==='filter'?'filter':id==='balancer'?'balancer':isServer?'server':null;const placed=id==='filter'?config.filterStrength>0:id==='balancer'?config.loadBalancer:true;const Icon=id==='users'?Users:id==='excess'?Waves:id==='filter'?Filter:id==='balancer'?Network:Server;const label=id==='users'?'Real visitors':id==='excess'?'Excess traffic':id==='filter'?'Rate Limiter':id==='balancer'?'Load Balancer':`Server ${index+1}`;const detail=id==='users'?`${tick?appliedConfig.legitRate:0} req/s`:id==='excess'?`${tick&&appliedConfig.attackType!=='none'?appliedConfig.attackRate:0} req/s`:id==='filter'?placed?`${Math.round(config.filterStrength*100)}% strength`:'Drop or click to add':id==='balancer'?placed?'Sharing workload':'Drop or click to add':index>0&&!config.loadBalancer?'Idle: add balancer':`${config.perServerCapacity} req/s capacity`;return <g key={id} data-layout-node={id} className={`force-node ${!placed?'empty':''} ${selection===id?'selected':''} ${id==='users'?'served-node':id==='excess'?'excess-node':''}`} onPointerDown={event=>begin(event,id)} onPointerMove={move} onPointerUp={event=>end(event,id)} onPointerCancel={event=>end(event,id)} {...(kind?dropProps(kind):{})}>
         <title>{label}: {detail}. Drag to move; select for settings. Moving a node does not change capacity.</title><rect x={-NW/2} y={-NH/2} width={NW} height={NH} rx="17"/>
-        <foreignObject x={-NW/2} y={-NH/2} width={NW} height={NH}><button className="force-node-button" aria-label={`${placed?'Select':'Add'} ${label}`} onClick={event=>{if(event.detail===0)choose(id);}}><Icon size={23}/><strong>{label}</strong><small>{detail}</small></button></foreignObject>
-        <circle className={`force-status ${isServer&&index>0&&!config.loadBalancer?'idle':metrics.cpuPercent>=95&&isServer?'pressure':''}`} cx="45" cy="-27" r="3"/>
+        <foreignObject x={-NW/2} y={-NH/2} width={NW} height={NH}><button className="force-node-button" aria-label={`${placed?'Select':'Add'} ${label}`} onClick={event=>{if(event.detail===0)choose(id);}}><Icon size={30}/><strong>{label}</strong><small>{detail}</small></button></foreignObject>
+        <circle className={`force-status ${isServer&&index>0&&!config.loadBalancer?'idle':metrics.cpuPercent>=95&&isServer?'pressure':''}`} cx="66" cy="-46" r="4"/>
       </g>;})}
-      <foreignObject x="650" y="518" width="130" height="32"><button className="force-add-server" disabled={disabled||count>=6} onClick={()=>deploy('server')} {...dropProps('server')}><Plus size={13}/> Add server</button></foreignObject>
+      <foreignObject x="625" y={compact?450:518} width="160" height="36"><button className="force-add-server" disabled={disabled||count>=6} onClick={()=>deploy('server')} {...dropProps('server')}><Plus size={13}/> Add server</button></foreignObject>
     </svg>
     {selection && <section className="node-popover" aria-label="Network node settings"><div className="node-popover-heading"><strong>{selection==='users'?'Real visitors':selection==='excess'?'Excess traffic':selectedKind==='filter'?'Protect traffic':selectedKind==='balancer'?'Share server workload':'Server configuration'}</strong><button className="icon-button" onClick={()=>setSelection(null)} aria-label="Close node settings"><X size={14}/></button></div>
       {selection==='users'||selection==='excess'?<RangeField label={selection==='users'?'Real visitors':'Excess traffic'} value={selection==='users'?config.legitRate:config.attackRate} max={selection==='users'?600:10000} step={selection==='users'?10:50} unit="req/s" description={trafficLocked?'Incident traffic is fixed.':'Changes apply on the next tick.'} disabled={disabled||trafficLocked} onChange={value=>onConfig(selection==='users'?{legitRate:value}:{attackRate:value,attackType:config.attackType==='none'&&value>0?'volume':config.attackType})}/>:selectedKind==='filter'?<><ToggleField label="Filtering enabled" enabled={config.filterStrength>0} disabled={disabled} onChange={()=>config.filterStrength?onRemove('filter'):deploy('filter')}/>{config.filterStrength>0&&<RangeField label="Filter strength" value={Math.round(config.filterStrength*100)} max={100} step={5} unit="%" description={`${metrics.blocked} blocked at the last tick. Filtering can reject real visitors too.`} disabled={disabled} onChange={value=>onConfig({filterStrength:value/100})}/>}</>:selectedKind==='balancer'?<><p>Shares requests across servers. Additional servers stay idle while this is off.</p><ToggleField label="Load balancing" enabled={config.loadBalancer} disabled={disabled} onChange={()=>config.loadBalancer?onRemove('balancer'):deploy('balancer')}/></>:<><p>CPU {metrics.cpuPercent.toFixed(0)}% / Connections {metrics.connectionPercent.toFixed(0)}% / {halfOpen} half-open</p><ServerStepper count={count} disabled={disabled} onChange={serverCount=>onConfig({serverCount})}/><RangeField label="Processing per server" value={config.perServerCapacity} min={50} max={1000} step={50} unit="req/s" description="Only balanced servers share capacity." disabled={disabled} onChange={perServerCapacity=>onConfig({perServerCapacity})}/></>}
