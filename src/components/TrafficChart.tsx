@@ -3,7 +3,7 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import type { SimulationState } from '../shared/simulationTypes';
 
 const series = [
-  { key: 'incoming', name: 'Incoming', color: '#262626' },
+  { key: 'incoming', name: 'Incoming', color: 'var(--color-ink-soft)' },
   { key: 'served', name: 'Served', color: '#278454' },
   { key: 'blocked', name: 'Blocked', color: '#9a9a9a' },
   { key: 'dropped', name: 'Dropped', color: '#d7473d' },
@@ -17,10 +17,10 @@ export function TrafficChart({ state }: { state: SimulationState }) {
     <div className="traffic-chart" role="img" aria-label={`Traffic history, ${data.length} snapshots. Latest: ${state.metrics.incoming} incoming, ${state.metrics.legitServed + state.metrics.attackServed} served, ${state.metrics.blocked} blocked, ${state.metrics.legitDropped + state.metrics.attackDropped} dropped requests per second.`}>
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <LineChart data={data} margin={{ top: 16, right: 20, left: -16, bottom: 2 }} accessibilityLayer>
-          <CartesianGrid stroke="#e8e8e8" vertical={false} strokeDasharray="3 5" />
-          <XAxis dataKey="tick" type="number" domain={data.length <= 1 ? [0, 10] : ['dataMin', 'dataMax']} allowDecimals={false} minTickGap={35} tick={{ fill: '#707070', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={value => `${value}s`} dy={8} />
-          <YAxis tick={{ fill: '#707070', fontSize: 11 }} allowDecimals={false} axisLine={false} tickLine={false} width={52} />
-          <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: 16, fontSize: 12 }} labelStyle={{ color: '#262626', marginBottom: 6 }} labelFormatter={value => `${value}s · requests/s`} />
+          <CartesianGrid stroke="var(--color-hairline)" vertical={false} strokeDasharray="3 5" />
+          <XAxis dataKey="tick" type="number" domain={data.length <= 1 ? [0, 10] : ['dataMin', 'dataMax']} allowDecimals={false} minTickGap={35} tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={value => `${value}s`} dy={8} />
+          <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} allowDecimals={false} axisLine={false} tickLine={false} width={52} />
+          <Tooltip contentStyle={{ background: 'var(--color-canvas)', border: '1px solid var(--color-hairline)', borderRadius: 16, fontSize: 12 }} labelStyle={{ color: 'var(--color-ink-soft)', marginBottom: 6 }} labelFormatter={value => `${value}s · requests/s`} />
           {series.map(item => <Line key={item.key} type="linear" dataKey={item.key} name={item.name} stroke={item.color} strokeWidth={2} dot={data.length === 1 ? { r: 4, strokeWidth: 0 } : false} activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff' }} isAnimationActive={false} />)}
         </LineChart>
       </ResponsiveContainer>
