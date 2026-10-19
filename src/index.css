@@ -1122,3 +1122,40 @@ body { min-width: 1200px; overflow: hidden; }
 .desktop-workspace .network-expanded .topology { min-height: 400px; }
 
 .tutor-connection { margin: 0; padding: 10px 24px; border-bottom: 1px solid var(--color-hairline); color: var(--color-text-muted); background: var(--color-canvas-soft); font-size: 10px; line-height: 1.5; flex-shrink: 0; }
+
+/* D3 owns only transient positions; React and the engine own configuration. */
+.force-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--color-canvas); }
+.force-svg { display: block; width: 100%; height: 100%; min-height: 220px; touch-action: none; }
+.force-node { cursor: grab; }
+.force-node:active { cursor: grabbing; }
+.force-node > rect { fill: var(--color-canvas-soft); stroke: var(--color-hairline); stroke-width: 1.5; }
+.force-node.empty > rect { fill: var(--color-canvas); stroke-dasharray: 5 4; }
+.force-node.selected > rect { stroke: var(--color-accent); stroke-width: 2; }
+.force-node.pointer-drop-target > rect { fill: var(--color-field); stroke: var(--color-accent); stroke-width: 3; }
+.force-node-button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 100%; height: 100%; padding: 8px 4px; color: var(--color-ink); cursor: inherit; user-select: none; }
+.force-node-button strong { font-size: 11px; font-weight: 600; }
+.force-node-button small { font-size: 9px; color: var(--color-text-muted); }
+.force-node-button:focus-visible { outline-offset: -4px; border-radius: 17px; }
+.served-node .force-node-button > svg { color: var(--green); }
+.excess-node .force-node-button > svg { color: var(--red); }
+.force-status { fill: var(--green); }
+.force-node.empty .force-status, .force-status.idle { fill: var(--color-text-faint); }
+.force-status.pressure { fill: var(--amber); }
+.server-drop-zone { fill: var(--color-canvas-soft); fill-opacity: .3; stroke: var(--color-hairline); stroke-dasharray: 4 6; }
+.server-drop-zone.pointer-drop-target { stroke: var(--color-accent); stroke-width: 3; }
+.force-link { fill: none; stroke: var(--color-hairline); stroke-width: 2; pointer-events: none; }
+.served-link { stroke: var(--green); }
+.excess-link { stroke: var(--red); }
+.congested-link { stroke: var(--amber); }
+.idle-link { stroke-dasharray: 3 6; opacity: .4; }
+.moving-link { stroke-dasharray: 7 14; animation: flow 1.5s linear infinite; }
+.force-add-server { display: flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--color-hairline); border-radius: 9999px; width: 100%; height: 30px; font-size: 11px; background: var(--color-canvas); }
+.force-help { padding: 8px 16px; font-size: 9px; color: var(--color-text-muted); border-top: 1px solid var(--color-hairline); flex-shrink: 0; }
+.node-popover { position: absolute; bottom: 12px; left: 12px; width: 260px; max-height: calc(100% - 24px); overflow-y: auto; border: 1px solid var(--color-hairline); border-radius: 16px; padding: 14px; background: var(--color-canvas); box-shadow: 0 4px 18px #00000018; z-index: 5; }
+.node-popover-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; }
+.node-popover-heading .icon-button { width: 24px; height: 24px; }
+.node-popover p { font-size: 11px; color: var(--color-text-muted); margin-top: 8px; }
+.node-popover > .text-button, .node-popover > .button { margin-top: 12px; }
+
+.force-node-button strong { font-size: 14px; }
+.force-node-button small { font-size: 11px; }
