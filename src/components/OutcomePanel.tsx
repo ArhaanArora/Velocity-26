@@ -16,6 +16,6 @@ export function OutcomePanel({ session, inspectorOpen, onInspect, onTutor }: { s
         <p>{outcome.explanation}</p><span className="measurement-tag">{outcome.action} · observed at {outcome.afterTick}s</span>
       </> : <><span className="effect-icon"><Lightbulb size={18} /></span><h3>Small changes teach a lot.</h3><p>Adjust the traffic or add a defense. We’ll compare the results after the next tick.</p></>}
     </section>
-    <section className="tutor-entry"><MessageCircle size={20} strokeWidth={1.6} /><h3>Make sense of the signals.</h3><p>Your lab companion explains what’s happening, using the current simulation.</p><button onClick={onTutor}>Why is this happening?<ArrowUpRight size={15} /></button><small>Built-in explanations. No external AI.</small></section>
+    <section className="tutor-entry"><MessageCircle size={20} strokeWidth={1.6} /><h3>Make sense of the signals.</h3><p>Your lab companion explains what’s happening, using the current simulation.</p><button onClick={onTutor}>Why is this happening?<ArrowUpRight size={15} /></button><small>Gemini when connected · Offline guide available</small></section>
   </aside>;
 }

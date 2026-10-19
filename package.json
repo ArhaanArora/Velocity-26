@@ -8,9 +8,12 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node src/lib/runChecks.mjs"
+    "test": "node src/lib/runChecks.mjs",
+    "ai": "node --env-file-if-exists=.env server/chat.mjs",
+    "test:ai": "node --test server/chat.test.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.30.0",
     "lucide-react": "^1.59.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

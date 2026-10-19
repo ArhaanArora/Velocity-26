@@ -1003,3 +1003,9 @@ input[type=range]::-moz-range-thumb { width: 9px; height: 9px; background: var(-
 .theme-toggle { flex-shrink: 0; }
 @media(max-width:520px) { .theme-toggle { width: 28px; height: 36px; } }
 @media(max-width:360px) { .header-actions .help-button { display: none; } }
+
+.tutor-api-notice { color: var(--amber); font-size: 11px; line-height: 1.6; margin: 8px 0; }
+.tutor-loading { display: flex; align-items: center; gap: 10px; color: var(--color-text-muted); font-size: 12px; padding: 16px 0; }
+.tutor-sources { margin-top: 12px; font-size: 11px; color: var(--color-text-muted); }
+.tutor-sources summary { cursor: pointer; }
+.tutor-sources ul { padding-left: 18px; margin-top: 8px; }
