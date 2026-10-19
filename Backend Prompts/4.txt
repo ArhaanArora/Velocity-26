@@ -1,42 +1,36 @@
-Perform a final integration-readiness review of CyberLab's simulation engine.
+Read AGENTS.md and MODEL.md. Final integration check of the CyberLab engine. The frontend developer will import it through src/adapters/engineAdapter.ts. You do not write the adapter, and you do not touch frontend files.
 
-The frontend developer is about to connect your engine to the React application.
-
-Inspect all files in `src/engine/` and the existing shared contract.
-
-## Verify
-
-1. `src/engine/index.ts` exports `simulationEngine`.
-2. The implementation satisfies `SimulationEngine`.
-3. Every field in `SimulationMetrics` is populated.
-4. The engine supports all required configuration properties.
-5. All exported presets match the shared contract.
-6. The engine can be imported without any backend service.
-7. There are no external network calls.
+Verify each item and report pass or fail with evidence:
+1. src/engine/index.ts exports simulationEngine.
+2. The implementation satisfies the SimulationEngine interface.
+3. Every field in SimulationMetrics is populated on every tick.
+4. Every config property in the contract is supported.
+5. All three presets match the contract types.
+6. The engine imports with no backend.
+7. No network calls: search src/engine for fetch, XMLHttpRequest, http, and https. Report the output.
 8. The previous state is not mutated.
-9. The queue and traffic accounting are consistent.
-10. No frontend or shared contract files were modified.
+9. The accounting equation holds on every tick of the test runs.
+10. No frontend or shared contract files changed: run git status and show the output.
 
-Run available tests and TypeScript checks.
+Run the typecheck and all tests. Show the actual output.
 
-If any failure occurs, fix it only within your owned files.
+If any check fails:
+- Fix it only inside src/engine/ if the fix does not change a public interface.
+- If the fix would require changing the contract, changing MODEL.md, or touching frontend files, stop and report. Do not patch around it.
 
-Do not rewrite working implementations or change public interfaces.
+Git: commit only src/engine/ to the feature/engine branch.
+- git add src/engine
+- git commit -m "engine: phase 4 integration readiness"
+- git push -u origin feature/engine
+- Do not merge to main.
 
-## Integration handoff
-
-At the end, provide:
-
+Handoff report:
 - Exact exported names.
 - File paths.
 - How to import the engine.
-- Example initialization and one-step usage.
+- Example initialization and one tick, with code.
 - Available presets.
-- Test results.
-- Any known limitations.
+- Test results (actual output).
+- Known limitations (for example, SYN timeout is an approximation, bandwidth is measured in requests per second, and the defense effects are simplified).
 
-Commit your completed engine files to the shared Git repository, using the team's agreed workflow.
-
-Do not modify frontend files or attempt to integrate the frontend yourself.
-
-**The final result should be ready for the frontend developer to import through `src/adapters/engineAdapter.ts`.**
+STOP after the handoff report.

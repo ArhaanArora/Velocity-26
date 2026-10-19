@@ -1,69 +1,15 @@
-You are the simulation-engine developer for **CyberLab**, a cybersecurity education web application being built by two students in a four-hour hackathon.
+You are the simulation-engine developer for CyberLab, a browser-based cybersecurity education simulator. You own src/engine/ only. Read AGENTS.md and MODEL.md first, then inspect the repo and src/shared/simulationTypes.ts.
 
-We are using Antigravity with Gemini Flash. Prioritize correctness, simplicity, and reliable integration over unnecessary complexity.
+Do not write code. Do not edit any file.
 
-## What CyberLab does
+Give me:
+1. A plain-language explanation (under 200 words) of how the engine works, tick by tick.
+2. The exact files you will create in src/engine/, and what each one does.
+3. A mapping table: each field in MODEL.md → the real field name in the contract. List any missing fields or name mismatches.
+4. Your opinion on the design of separate queueLegit and queueAttack fields, and the split rule. Do you agree they correctly distinguish legitimate queued requests from attack requests across ticks? Flag any problem.
+5. Any edge cases in MODEL.md that could break (zero capacity, zero queue, config changes mid-run, SYN timeouts).
+6. The exact diff you would propose to simulationTypes.ts. Do not apply it. I will approve it.
+7. The test runner and typecheck commands you found in package.json. If there is no test runner, say so.
+8. A list of open questions for me.
 
-CyberLab is an interactive, browser-based educational simulator.
-
-Students can observe a fictional web server, increase simulated traffic, see the server struggle, deploy defensive components, and understand the effects through live metrics.
-
-The frontend developer is building the UI separately in React.
-
-Your responsibility is the simulation logic only.
-
-The simulation must be entirely mathematical and run locally in the browser. Do not create real DDoS traffic, networking tools, external requests, or attack implementations.
-
-## Architecture
-
-- Language: TypeScript.
-- No backend server.
-- No database or authentication.
-- No real network traffic.
-- No new dependencies unless absolutely necessary.
-- Pure, synchronous simulation functions.
-- Deterministic outputs.
-- One simulation tick represents one simulated second.
-
-## Repository boundaries
-
-You own ONLY:
-
-`src/engine/`
-
-The other developer owns:
-
-`src/components/`
-`src/hooks/`
-`src/mocks/`
-`src/adapters/`
-`src/App.tsx`
-`src/index.css`
-
-The shared contract is:
-
-`src/shared/simulationTypes.ts`
-
-**You must not modify the shared contract or frontend files.**
-
-## Your first task
-
-Inspect the repository and shared TypeScript contract.
-
-Then provide:
-
-1. A simple explanation of how you will build the simulation.
-2. The exact files you intend to create.
-3. How incoming simulated traffic will affect server resources.
-4. How state and queued requests will be tracked between simulation ticks.
-5. How we will avoid incorrect counting of served, blocked, dropped, and queued requests.
-6. How the frontend will use your engine.
-7. Any problems or missing information in the shared contract.
-
-Pay special attention to whether the contract can distinguish legitimate queued requests from simulated excess queued requests across multiple ticks. Flag this issue rather than silently inventing incompatible state fields.
-
-Keep your explanation beginner-friendly and concise.
-
-Do not write code yet.
-
-**STOP after presenting the plan. Wait for my approval before implementing anything.**
+STOP after presenting the plan. Wait for my approval.

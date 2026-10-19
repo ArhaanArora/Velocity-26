@@ -1,32 +1,17 @@
-Phase 3: Prepare the existing CyberLab simulation engine for the frontend.
+Read AGENTS.md and MODEL.md. Phases 1 and 2 are complete. Do not change engine formulas in this phase.
 
-Do not rewrite working engine code.
+Part A: Presets. Create src/engine/presets.ts with three exported configs:
+- normalTrafficPreset: stable service, high legitimate availability. Example: legitRate 50, attackType none.
+- trafficSurgePreset: workload exceeds capacity and degrades service. Example: legitRate 50, attackType volume, attackRate 800, perServerCapacity 300.
+- midnightOutagePreset: the main challenge. Example: legitRate 50, attackType volume, attackRate 5000, perServerCapacity 300, perServerBandwidth 1000, perServerConnections 200, perServerQueue 500, filterStrength 0, loadBalancer false, serverCount 1.
 
-## Part A — Presets
+Targets for midnightOutagePreset (starting values, not hard rules):
+- With no defenses: legitAvailabilityPercent below 60.
+- With filterStrength 0.9, loadBalancer true, serverCount 3: legitAvailabilityPercent at least 85.
 
-Create three configuration presets in `src/engine/presets.ts`:
+Run each preset for 20 ticks and report the actual numbers. If a target is not met, report the real numbers and suggest a constant to change. Do not change engine formulas to hit a target. You may change preset values only.
 
-### Normal Traffic
-A stable fictional web service with high legitimate-user availability.
-
-### Traffic Surge
-A scenario where the incoming workload exceeds available resources and causes observable service degradation.
-
-### Midnight Outage
-The main educational challenge.
-
-A fictional service experiences substantial excess traffic.
-
-Students must investigate the resource metrics and improve legitimate-user availability using defensive configuration changes.
-
-All three presets must conform to the existing shared TypeScript contract.
-
-Export them with clear names.
-
-## Part B — Automated tests
-
-Test the following:
-
+Part B: Automated tests. Cover all ten areas below. Keep each test small (one to three checks).
 1. Normal operation.
 2. Overload.
 3. Filtering improvements and trade-offs.
@@ -34,36 +19,23 @@ Test the following:
 5. Capacity adjustments.
 6. Queue capacity limits.
 7. Valid percentage ranges.
-8. Deterministic simulation.
-9. Valid state history.
+8. Deterministic simulation (same input gives same output).
+9. Valid state history (at most 60, newest last).
 10. Correct public exports.
 
-Use existing testing tools when available.
+Test runner: check package.json.
+- If a runner exists (for example vitest or jest), use it.
+- If not, do not install anything. Write a dependency-free assertion script in src/engine/. Compile it with npx tsc and run it with node. Report the exact commands.
 
-If the repository has no test runner and installing one would require changing files outside your ownership, stop and report this. You may create a dependency-free assertion script inside `src/engine/` if it can run with the available environment.
-
-## Part C — Documentation
-
-Create a short README inside `src/engine/` explaining:
-
+Part C: README. Create src/engine/README.md in beginner-friendly language. It must explain:
 - What the engine simulates.
 - What it intentionally simplifies.
 - How to import it.
-- How to run one simulation tick.
-- How each defensive setting affects the model.
+- How to run one tick.
+- How each defense setting affects the model.
 
-Use beginner-friendly language.
+Rules: only edit src/engine/. No network calls. No new dependencies. Do not invent test results.
 
-## Rules
+Report the status of each test (pass or fail, with the actual output), the presets' actual numbers, and the commands you ran.
 
-Do not edit frontend files.
-
-Do not modify the shared contract.
-
-Do not generate real traffic or external network requests.
-
-Do not add unnecessary dependencies.
-
-Do not invent results from tests that have not run.
-
-**STOP after completing and testing this phase. Report the status of each test.**
+STOP after completing and testing this phase.

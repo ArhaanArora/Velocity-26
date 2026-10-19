@@ -1,97 +1,42 @@
-Proceed with Phase 1 of CyberLab's simulation engine.
+Read AGENTS.md and MODEL.md. Implement Phase 1 of the CyberLab engine.
 
-Implement ONLY the core server simulation.
+Scope:
+- Implement steps 1, 3, 4, 5, 6, 7, 8, 9, 10 (split rule), 11 (metrics), and 12 (next state) from MODEL.md.
+- Step 2 (filter) is Phase 2. In Phase 1, treat filterStrength as 0 and both blocked counts as 0. Leave a clearly named function for step 2 that returns zeros, so Phase 2 only fills it in.
+- Use effectiveServers = 1 in Phase 1, regardless of loadBalancer.
+- Support both 'volume' and 'syn' attack types.
 
-Follow the approved plan and the existing shared contract exactly.
+Files: create only the files you listed in your approved plan, all inside src/engine/.
 
-## Your task
+Export:
+- createInitialState(config)
+- stepSimulation(config, state)
+- simulationEngine: SimulationEngine, from src/engine/index.ts
 
-Inside `src/engine/`, create the smallest functional implementation of:
+Use the types from src/shared/simulationTypes.ts. Do not change them.
 
-1. `createInitialState(config)`
-2. `stepSimulation(config, state)`
-
-Export them through:
-
-`export const simulationEngine: SimulationEngine`
-
-in `src/engine/index.ts`.
-
-Use the existing TypeScript interfaces from `src/shared/simulationTypes.ts`.
-
-## Required behavior
-
-### Normal operation
-
-Under normal traffic, the fictional server should:
-
-- Serve most legitimate requests.
-- Have low resource utilization.
-- Maintain a small or empty queue.
-- Report high legitimate-user availability.
-
-### Traffic overload
-
-When the simulated excess request rate increases:
-
-- Incoming traffic increases.
-- Resource utilization increases.
-- The queue may grow.
-- Requests may be dropped when capacity is exceeded.
-- Legitimate-user availability can decrease.
-- Approximate latency can rise.
-
-### Resource model
-
-Track four abstract server resources:
-
-- CPU utilization.
-- Bandwidth utilization.
-- Connection utilization.
-- Request queue utilization.
-
-These are educational approximations, not measurements of real network equipment.
-
-Each resource should have a clear, documented relationship to the model's current state.
-
-### Consistency
-
-- No negative metrics.
-- Percentages always between 0 and 100.
-- Queue never exceeds its configured capacity.
-- No requests counted twice.
-- Preserve consistent accounting between simulation ticks.
-- No random numbers.
-- Same input state and configuration must produce the same output.
+Rules:
+- Deterministic. No random numbers. No network calls.
 - Do not mutate the previous state.
-- Limit history to 60 snapshots.
-- Initial state should be valid and usable immediately.
+- Percentages stay between 0 and 100.
+- Queue never exceeds its limit.
+- No negative metrics.
+- History is a rolling buffer of at most 60 snapshots.
+- Initial state is valid and usable immediately (tick 0, all queues and half-open connections at 0, empty history).
 
-## Important restrictions
+Verification (run it, do not assume):
+1. Run the typecheck: npx tsc --noEmit (or the typecheck script in package.json).
+2. Normal traffic example: legitRate 50, attackType none, perServerCapacity 300, perServerBandwidth 1000, perServerConnections 200, perServerQueue 500, filterStrength 0, loadBalancer false, serverCount 1. Run 10 ticks. Show the metrics table.
+3. Volume flood example: same config, attackType volume, attackRate 5000. Run 10 ticks. Show the metrics table.
+4. SYN flood example: same config, attackType syn, attackRate 500. Run 10 ticks. Show the metrics table.
+5. For every tick in 2 to 4, check the accounting equation for the total and for each type. Report any tick that fails.
+6. Confirm the previous state is not mutated (compare deep copies).
+7. Confirm history never exceeds 60 entries (run 70 ticks).
 
-Do not implement defense mechanisms yet.
+Report:
+- Typecheck result (the actual output).
+- The three metric tables.
+- Accounting check result.
+- Any assumptions or incomplete behavior.
 
-Do not add new attack types.
-
-Do not build UI components.
-
-Do not modify the shared contract.
-
-Do not change project dependencies or configuration.
-
-Do not implement any real network behavior.
-
-## Verification
-
-After implementation:
-
-1. Run available TypeScript validation.
-2. Exercise the engine with a normal-traffic example.
-3. Exercise the engine with an overloaded example.
-4. Show the relevant metric outputs.
-5. Explain the model's assumptions.
-6. Report any incomplete or unsupported behavior.
-
-Do not invent successful test results.
-
-**STOP when the core engine works. Summarize what you built and wait for the next instruction.**
+STOP when the core engine works. Summarize what you built. Do not start Phase 2.
