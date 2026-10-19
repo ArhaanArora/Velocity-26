@@ -1,0 +1,42 @@
+Perform a final integration-readiness review of CyberLab's simulation engine.
+
+The frontend developer is about to connect your engine to the React application.
+
+Inspect all files in `src/engine/` and the existing shared contract.
+
+## Verify
+
+1. `src/engine/index.ts` exports `simulationEngine`.
+2. The implementation satisfies `SimulationEngine`.
+3. Every field in `SimulationMetrics` is populated.
+4. The engine supports all required configuration properties.
+5. All exported presets match the shared contract.
+6. The engine can be imported without any backend service.
+7. There are no external network calls.
+8. The previous state is not mutated.
+9. The queue and traffic accounting are consistent.
+10. No frontend or shared contract files were modified.
+
+Run available tests and TypeScript checks.
+
+If any failure occurs, fix it only within your owned files.
+
+Do not rewrite working implementations or change public interfaces.
+
+## Integration handoff
+
+At the end, provide:
+
+- Exact exported names.
+- File paths.
+- How to import the engine.
+- Example initialization and one-step usage.
+- Available presets.
+- Test results.
+- Any known limitations.
+
+Commit your completed engine files to the shared Git repository, using the team's agreed workflow.
+
+Do not modify frontend files or attempt to integrate the frontend yourself.
+
+**The final result should be ready for the frontend developer to import through `src/adapters/engineAdapter.ts`.**

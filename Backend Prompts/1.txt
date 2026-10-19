@@ -1,0 +1,97 @@
+Proceed with Phase 1 of CyberLab's simulation engine.
+
+Implement ONLY the core server simulation.
+
+Follow the approved plan and the existing shared contract exactly.
+
+## Your task
+
+Inside `src/engine/`, create the smallest functional implementation of:
+
+1. `createInitialState(config)`
+2. `stepSimulation(config, state)`
+
+Export them through:
+
+`export const simulationEngine: SimulationEngine`
+
+in `src/engine/index.ts`.
+
+Use the existing TypeScript interfaces from `src/shared/simulationTypes.ts`.
+
+## Required behavior
+
+### Normal operation
+
+Under normal traffic, the fictional server should:
+
+- Serve most legitimate requests.
+- Have low resource utilization.
+- Maintain a small or empty queue.
+- Report high legitimate-user availability.
+
+### Traffic overload
+
+When the simulated excess request rate increases:
+
+- Incoming traffic increases.
+- Resource utilization increases.
+- The queue may grow.
+- Requests may be dropped when capacity is exceeded.
+- Legitimate-user availability can decrease.
+- Approximate latency can rise.
+
+### Resource model
+
+Track four abstract server resources:
+
+- CPU utilization.
+- Bandwidth utilization.
+- Connection utilization.
+- Request queue utilization.
+
+These are educational approximations, not measurements of real network equipment.
+
+Each resource should have a clear, documented relationship to the model's current state.
+
+### Consistency
+
+- No negative metrics.
+- Percentages always between 0 and 100.
+- Queue never exceeds its configured capacity.
+- No requests counted twice.
+- Preserve consistent accounting between simulation ticks.
+- No random numbers.
+- Same input state and configuration must produce the same output.
+- Do not mutate the previous state.
+- Limit history to 60 snapshots.
+- Initial state should be valid and usable immediately.
+
+## Important restrictions
+
+Do not implement defense mechanisms yet.
+
+Do not add new attack types.
+
+Do not build UI components.
+
+Do not modify the shared contract.
+
+Do not change project dependencies or configuration.
+
+Do not implement any real network behavior.
+
+## Verification
+
+After implementation:
+
+1. Run available TypeScript validation.
+2. Exercise the engine with a normal-traffic example.
+3. Exercise the engine with an overloaded example.
+4. Show the relevant metric outputs.
+5. Explain the model's assumptions.
+6. Report any incomplete or unsupported behavior.
+
+Do not invent successful test results.
+
+**STOP when the core engine works. Summarize what you built and wait for the next instruction.**

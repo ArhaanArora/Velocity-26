@@ -1,0 +1,69 @@
+Phase 3: Prepare the existing CyberLab simulation engine for the frontend.
+
+Do not rewrite working engine code.
+
+## Part A — Presets
+
+Create three configuration presets in `src/engine/presets.ts`:
+
+### Normal Traffic
+A stable fictional web service with high legitimate-user availability.
+
+### Traffic Surge
+A scenario where the incoming workload exceeds available resources and causes observable service degradation.
+
+### Midnight Outage
+The main educational challenge.
+
+A fictional service experiences substantial excess traffic.
+
+Students must investigate the resource metrics and improve legitimate-user availability using defensive configuration changes.
+
+All three presets must conform to the existing shared TypeScript contract.
+
+Export them with clear names.
+
+## Part B — Automated tests
+
+Test the following:
+
+1. Normal operation.
+2. Overload.
+3. Filtering improvements and trade-offs.
+4. Load balancing behavior.
+5. Capacity adjustments.
+6. Queue capacity limits.
+7. Valid percentage ranges.
+8. Deterministic simulation.
+9. Valid state history.
+10. Correct public exports.
+
+Use existing testing tools when available.
+
+If the repository has no test runner and installing one would require changing files outside your ownership, stop and report this. You may create a dependency-free assertion script inside `src/engine/` if it can run with the available environment.
+
+## Part C — Documentation
+
+Create a short README inside `src/engine/` explaining:
+
+- What the engine simulates.
+- What it intentionally simplifies.
+- How to import it.
+- How to run one simulation tick.
+- How each defensive setting affects the model.
+
+Use beginner-friendly language.
+
+## Rules
+
+Do not edit frontend files.
+
+Do not modify the shared contract.
+
+Do not generate real traffic or external network requests.
+
+Do not add unnecessary dependencies.
+
+Do not invent results from tests that have not run.
+
+**STOP after completing and testing this phase. Report the status of each test.**

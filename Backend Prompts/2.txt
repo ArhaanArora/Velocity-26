@@ -1,0 +1,68 @@
+Phase 2: Extend CyberLab's existing simulation engine with defensive mechanisms.
+
+The core engine already exists.
+
+**Do not rewrite it from scratch.**
+
+Inspect the existing code first and preserve working behavior and the shared public interface.
+
+## Implement three defenses
+
+### 1. Traffic filtering / rate limiting
+
+When enabled, the simulator should reduce the excess traffic reaching the protected service.
+
+Use the existing `filterStrength` configuration value to represent stronger or weaker filtering.
+
+Important educational trade-off:
+
+More aggressive filtering can also block legitimate requests.
+
+Do not make filtering automatically solve every overload condition.
+
+### 2. Load balancing
+
+When enabled, multiple simulated servers can share processing work.
+
+The total effective capacity should increase with server count, subject to the simplified model's resource limits.
+
+When load balancing is disabled, adding more server instances must not automatically multiply effective processing capacity.
+
+### 3. Server capacity adjustments
+
+Changing the configured capacity should predictably affect how much incoming work the service can handle.
+
+## Key requirements
+
+Defense behavior must be:
+
+- Deterministic.
+- Easy to explain.
+- Mathematically consistent.
+- Reflected in the existing output metrics.
+- Compatible with the frontend configuration.
+
+Avoid unsupported promises about real-world security effectiveness.
+
+Do not add extra network protocols, real attack logic, or third-party packages.
+
+## Required checks
+
+Test these cases:
+
+1. Overload without defenses.
+2. Same overload with moderate filtering.
+3. Same overload with aggressive filtering.
+4. Same overload with multiple servers and load balancing.
+5. Additional servers without the balancer.
+6. A situation where legitimate users are unnecessarily blocked.
+
+Show concise before-and-after metrics for each case.
+
+Do not hardcode specific output numbers solely to make the demo look successful.
+
+All behavior must emerge from the simulation calculations.
+
+Preserve existing functioning code. Modify only `src/engine/`.
+
+**STOP after implementation, validation, and a short summary.**
