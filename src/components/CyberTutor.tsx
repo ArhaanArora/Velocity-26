@@ -26,7 +26,7 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
   const inputRef = useRef<HTMLInputElement>(null);
   const currentMessages = messages[mode];
   useEffect(() => { if (open) inputRef.current?.focus(); }, [open]);
-  useEffect(() => { if (open && currentMessages.length) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [currentMessages.length, open]);
+  useEffect(() => { if (open && currentMessages.length) endRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' }); }, [currentMessages.length, open]);
   useEffect(() => { setQuestion(''); }, [mode]);
   if (!open) return null;
   function ask(value: string) {
@@ -39,12 +39,12 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
     inputRef.current?.focus();
   }
   return <aside className="tutor-drawer" aria-label="Cyber Tutor" onKeyDown={event => { if (event.key === 'Escape') onClose(); }}>
-    <div className="tutor-drawer-heading"><span className="tutor-avatar"><Bot size={23} /></span><div><h2>Cyber Tutor</h2><span><i className="status-dot healthy" /> Connected to your {mode}</span></div><button className="icon-button" onClick={onClose} aria-label="Close Cyber Tutor"><X size={19} /></button></div>
-    <div className="tutor-context"><span>LIVE CONTEXT</span><b>{metrics.legitAvailabilityPercent.toFixed(0)}% availability</b><span>Tick {tick}</span></div>
+    <div className="tutor-drawer-heading"><span className="tutor-avatar"><MessageCircle size={23} /></span><div><h2>Cyber Tutor</h2><span>Context from your {mode}</span></div><button className="icon-button" onClick={onClose} aria-label="Close Cyber Tutor"><X size={19} /></button></div>
+    <div className="tutor-context"><span>Your current signals</span><b>{metrics.legitAvailabilityPercent.toFixed(1)}% availability</b><span>{tick}s</span></div>
     <div className="tutor-conversation">
-      <div className="tutor-welcome"><Sparkles size={23} /><h3>Let’s make sense of it.</h3><p>I explain your current configuration and metrics using built-in learning rules. Answers are snapshots of the tick when you ask.</p></div>
-      <div className="question-chips">{(mode === 'challenge' ? ['Give me a hint', 'Why is my server struggling?', 'Why is the queue full?'] : suggestedQuestions).map(text => <button key={text} onClick={() => ask(text)}>{text}<ArrowRight size={12} /></button>)}</div>
-      <div className="messages" aria-live="polite" aria-relevant="additions">{currentMessages.map(message => <div key={message.id} className={`message ${message.role}`}><span>{message.role === 'tutor' ? 'CYBER TUTOR' : 'YOU'} <small>· TICK {message.tick}</small></span><p>{message.text}</p></div>)}</div>
+      <div className="tutor-welcome"><h3>Why is this happening?</h3><p>Let’s look at the evidence together. These built-in explanations use your actual simulation, at the moment you ask.</p></div>
+      <div className="question-chips">{(mode === 'challenge' ? ['Give me a hint', 'Why is my website slow?', 'What does the request queue mean?'] : suggestedQuestions).map(text => <button key={text} onClick={() => ask(text)}>{text}<ArrowRight size={12} /></button>)}</div>
+      <div className="messages" aria-live="polite" aria-relevant="additions">{currentMessages.map(message => <div key={message.id} className={`message ${message.role}`}><span>{message.role === 'tutor' ? 'Cyber Tutor' : 'You'} <small>· {message.tick}s</small></span><p>{message.text}</p></div>)}</div>
       <div ref={endRef} />
     </div>
     <form className="tutor-form" onSubmit={event => { event.preventDefault(); ask(question); }}><label className="sr-only" htmlFor="tutor-question">Ask Cyber Tutor</label><input ref={inputRef} id="tutor-question" placeholder="Ask about your network…" value={question} maxLength={400} onChange={event => setQuestion(event.target.value)} /><button type="submit" disabled={!question.trim()} aria-label="Send question"><Send size={17} /></button></form>

@@ -13,7 +13,7 @@ try {
     logLevel: 'error',
     build: {
       ssr: true, write: false, minify: false,
-      rolldownOptions: { input: ['src/engine/testRunner.ts', 'src/adapters/engineAdapter.test.ts', 'src/mocks/mockEngine.test.mjs', 'src/lib/learning.test.mjs'] },
+      rolldownOptions: { input: ['src/engine/testRunner.ts', 'src/adapters/engineAdapter.test.ts', 'src/mocks/mockEngine.test.mjs', 'src/lib/learning.test.mjs', 'src/lib/experience.test.ts'] },
     },
   });
   const entries = [];

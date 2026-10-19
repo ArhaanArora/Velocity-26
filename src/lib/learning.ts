@@ -18,12 +18,12 @@ export function resourcePressure(metrics: SimulationMetrics) {
 }
 
 export const suggestedQuestions = [
-  'Why is my server struggling?',
-  'What does rate limiting do?',
-  'Why are legitimate users being blocked?',
-  'What are connection slots?',
-  'Why is the queue full?',
-  "Why isn't my defense working?",
+  'Why is my website slow?',
+  'Why are requests failing?',
+  'What does a rate limiter do?',
+  'Why might adding servers help?',
+  'Why can filtering harm legitimate users?',
+  'What does the request queue mean?',
 ];
 
 export function explain(question: string, config: SimulationConfig, metrics: SimulationMetrics, challenge = false, hintLevel = 0): string {
@@ -53,7 +53,7 @@ export function explain(question: string, config: SimulationConfig, metrics: Sim
   if (/queue|latency|waiting/.test(q)) {
     return `The queue holds requests that could not be processed immediately. It currently contains ${metrics.queueDepth} of ${config.perServerQueue * effectiveServers} configured requests, with estimated latency of ${metrics.latencyMs} ms. ${metrics.connectionPercent >= 90 ? 'Free connection slots also limit queue room, even when the configured queue is not full.' : metrics.queuePercent >= 90 ? 'The queue is close to full, so further arrivals can be dropped.' : 'More queue space can absorb a short burst, but it does not add processing capacity.'} Reducing demand or increasing effective capacity helps the backlog drain.`;
   }
-  if (/defen|balanc|server|capacity|slow|struggl|cause|bottleneck|cpu/.test(q)) {
+  if (/defen|balanc|server|capacity|slow|struggl|cause|bottleneck|cpu|fail|website|availability/.test(q)) {
     if (challenge) return `At the last simulated tick, incoming traffic was ${metrics.incoming} requests/s and effective capacity was ${capacity} requests/s. CPU is ${metrics.cpuPercent.toFixed(0)}% and the queue is ${metrics.queuePercent.toFixed(0)}% full. Compare these signals, then test one defense at a time. Ask for a hint when you need another clue.`;
     return `${metrics.incoming} requests/s arrived at the last tick, with ${capacity} requests/s of effective processing capacity. CPU is ${metrics.cpuPercent.toFixed(0)}% and availability is ${metrics.legitAvailabilityPercent.toFixed(0)}%. ${config.serverCount > 1 && !config.loadBalancer ? 'You have extra servers, but the load balancer is off: only one server handles traffic.' : metrics.connectionPercent >= 90 ? 'Connections are under pressure. Half-open SYN connections and queued requests compete for these slots; compare the connection and queue meters.' : metrics.cpuPercent >= 90 ? 'Processing is under pressure. Try filtering excess traffic or distributing work across more servers.' : 'Processing has headroom. Watch the queue and availability as you increase traffic.'}`;
   }

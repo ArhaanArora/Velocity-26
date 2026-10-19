@@ -2,7 +2,8 @@ import { useCallback, useEffect, useReducer } from 'react';
 import { simulationEngine } from '../adapters/engineAdapter';
 import { midnightOutagePreset, normalTrafficPreset } from '../lib/presets';
 import { advanceStability, STABLE_TARGET } from '../lib/learning';
-import type { SimulationConfig, SimulationState } from '../shared/simulationTypes';
+import { measureChange, sameConfig, type ChangeBaseline, type MeasuredOutcome } from '../lib/experience';
+import type { SimulationConfig, SimulationMetrics, SimulationState } from '../shared/simulationTypes';
 
 export type Mode = 'sandbox' | 'challenge';
 export interface Session {
@@ -16,6 +17,9 @@ export interface Session {
   filterUsed: boolean;
   balancerUsed: boolean;
   maxServers: number;
+  pendingChange: ChangeBaseline | null;
+  outcome: MeasuredOutcome | null;
+  incidentMetrics: SimulationMetrics | null;
 }
 interface LabState { mode: Mode; sandbox: Session; challenge: Session }
 type Action =
@@ -29,7 +33,7 @@ type Action =
 
 function createSession(mode: Mode): Session {
   const config = { ...(mode === 'challenge' ? midnightOutagePreset : normalTrafficPreset) };
-  return { config, appliedConfig: { ...config }, state: simulationEngine.createInitialState(config), running: false, started: mode === 'sandbox', stableTicks: 0, completedAt: null, filterUsed: false, balancerUsed: false, maxServers: config.serverCount };
+  return { config, appliedConfig: { ...config }, state: simulationEngine.createInitialState(config), running: false, started: mode === 'sandbox', stableTicks: 0, completedAt: null, filterUsed: false, balancerUsed: false, maxServers: config.serverCount, pendingChange: null, outcome: null, incidentMetrics: null };
 }
 function initialState(): LabState { return { mode: 'sandbox', sandbox: createSession('sandbox'), challenge: createSession('challenge') }; }
 
@@ -41,12 +45,16 @@ function reducer(lab: LabState, action: Action): LabState {
     case 'switch':
       if (action.mode === mode) return lab;
       return { ...lab, mode: action.mode, [mode]: { ...current, running: false } };
-    case 'config':
+    case 'config': {
       // Challenge source rates stay fixed; infrastructure remains configurable.
       if (mode === 'challenge' && ('legitRate' in action.patch || 'attackRate' in action.patch || 'attackType' in action.patch)) return lab;
       if (!current.started || current.completedAt !== null) return lab;
-      next = { ...current, config: { ...current.config, ...action.patch } };
+      const config = { ...current.config, ...action.patch };
+      if (sameConfig(config, current.config)) return lab;
+      const baseline = current.pendingChange ?? { metrics: { ...current.state.metrics }, config: { ...current.appliedConfig }, tick: current.state.tick };
+      next = { ...current, config, pendingChange: sameConfig(config, current.appliedConfig) ? null : baseline };
       break;
+    }
     case 'toggle':
       if (!current.started || current.completedAt !== null) return lab;
       next = { ...current, running: !current.running };
@@ -56,7 +64,7 @@ function reducer(lab: LabState, action: Action): LabState {
       const state = simulationEngine.stepSimulation(current.config, current.state);
       const stableTicks = mode === 'challenge' ? advanceStability(current.stableTicks, state.metrics.legitAvailabilityPercent) : 0;
       const completedAt = mode === 'challenge' && stableTicks >= STABLE_TARGET ? state.tick : null;
-      next = { ...current, state, appliedConfig: { ...current.config }, stableTicks, completedAt, running: completedAt === null && current.running, filterUsed: current.filterUsed || (current.config.filterStrength > 0), balancerUsed: current.balancerUsed || current.config.loadBalancer, maxServers: Math.max(current.maxServers, current.config.serverCount) };
+      next = { ...current, state, appliedConfig: { ...current.config }, stableTicks, completedAt, running: completedAt === null && current.running, filterUsed: current.filterUsed || (current.config.filterStrength > 0), balancerUsed: current.balancerUsed || current.config.loadBalancer, maxServers: Math.max(current.maxServers, current.config.serverCount), pendingChange: null, outcome: current.pendingChange ? measureChange(current.pendingChange, state.metrics, current.config, state.tick) : current.outcome, incidentMetrics: mode === 'challenge' ? current.incidentMetrics ?? { ...state.metrics } : null };
       break;
     }
     case 'reset': next = createSession(mode); break;
