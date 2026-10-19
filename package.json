@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "node server/start.mjs",
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build",
-    "preview": "vite preview --host 127.0.0.1",
+    "preview": "node server/start.mjs --preview",
     "test": "node src/lib/runChecks.mjs",
     "ai": "node --env-file-if-exists=.env server/chat.mjs",
-    "test:ai": "node --test server/chat.test.mjs"
+    "test:ai": "node --test server/chat.test.mjs",
+    "dev:frontend": "vite --host 127.0.0.1",
+    "preview:frontend": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
     "@google/genai": "^2.30.0",

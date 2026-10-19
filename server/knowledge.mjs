@@ -7,9 +7,18 @@ export const documents = [
   { id: 'balancing', title: 'Load balancing and additional servers', keywords: 'load balance balancer balancing servers capacity scale', text: 'A load balancer distributes work. In CyberLab, enabling it multiplies processing, bandwidth reference, connection slots, and queue capacity by server count. Without it only one server is active, even when more are configured.' },
   { id: 'connections', title: 'SYN connection exhaustion', keywords: 'syn connection connections exhaustion slots handshake half open', text: 'Incomplete SYN handshakes occupy half-open connection slots. In CyberLab these decay over approximately three ticks. They reduce space available to queued requests, but do not directly prevent immediate processing. SYN arrivals do not enter the processing queue.' },
   { id: 'model', title: 'CyberLab measurements and simplifications', keywords: 'model simulation availability measurements tick assumptions', text: 'One tick is one simulated second. All rates are requests per second. Availability is legitimate requests served divided by legitimate arrivals, capped at 100%; zero legitimate arrivals yields 100%. The model uses aggregate integer counts and proportional sharing, not real packets. Dropped excludes requests rejected by filtering; blocked counts both classes rejected by filtering. Do not infer real-world guarantees from these results.' },
+  { id: 'troubleshooting', title: 'Investigating failures and defense trade-offs', keywords: 'crash crashing website unavailable failed bottleneck troubleshoot change improve', text: 'Compare legitimate availability with CPU, queue, and connection pressure. If CPU is saturated, compare incoming demand with active processing capacity. More servers require balancing; a filter reduces demand but may reject real customers. More queue room can reduce drops while increasing waiting time. Measure a change on a subsequent tick. High total throughput alone does not mean legitimate visitors are being served.' },
 ];
 
 export function retrieve(question, limit = 3) {
   const words = [...new Set(question.toLowerCase().match(/[a-z]{3,}/g) ?? [])].filter(word => !['the', 'what', 'why', 'does', 'this', 'that', 'with', 'are', 'can', 'how', 'and', 'for', 'about'].includes(word));
   return documents.map(doc => ({ ...doc, score: words.reduce((score, word) => score + (doc.keywords.includes(word) ? 3 : doc.text.toLowerCase().includes(word) ? 1 : 0), 0) })).filter(doc => doc.score > 0).sort((a,b) => b.score - a.score).slice(0, limit);
+}
+
+export function retrieveForContext(question, metrics, messages = []) {
+  const followUp = /\b(it|that|this|they|those|why not|what next|still|helping)\b/i.test(question);
+  const previous = followUp ? messages.filter(message=>message.role==='user').slice(-2).map(message=>message.text).join(' ') : '';
+  const aboutState = /website|crash|slow|fail|bottleneck|what should|what.*change|help|hint|server|pressure|improv|unavailable/i.test(question);
+  const signals = aboutState ? [metrics.cpuPercent>=90?'cpu processing capacity':'',metrics.connectionPercent>=90?'syn connection slots':'',metrics.queuePercent>=70 || metrics.latencyMs>=300?'queue latency waiting':'',metrics.legitAvailabilityPercent<90?'legitimate availability troubleshooting':''].join(' ') : '';
+  return retrieve(`${question} ${previous} ${signals}`);
 }

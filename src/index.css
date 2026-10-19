@@ -1120,3 +1120,5 @@ body { min-width: 1200px; overflow: hidden; }
 .floating-tutor { position: fixed; bottom: 22px; left: 32px; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 16px; border: 1px solid var(--color-hairline); border-radius: 9999px; color: var(--color-ink); background: var(--color-canvas-soft); z-index: 50; font-size: 11px; }
 .desktop-workspace .network-expanded { position: fixed; inset: 24px; z-index: 80; }
 .desktop-workspace .network-expanded .topology { min-height: 400px; }
+
+.tutor-connection { margin: 0; padding: 10px 24px; border-bottom: 1px solid var(--color-hairline); color: var(--color-text-muted); background: var(--color-canvas-soft); font-size: 10px; line-height: 1.5; flex-shrink: 0; }

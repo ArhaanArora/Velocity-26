@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { SimulationConfig, SimulationMetrics } from '../shared/simulationTypes';
 import { explain, resourcePressure, suggestedQuestions } from '../lib/learning';
 import type { Mode } from '../hooks/useSimulation';
-import { requestTutorAnswer, type TutorSource } from '../adapters/tutorApi';
+import { getTutorHealth, requestTutorAnswer, type TutorSource } from '../adapters/tutorApi';
 
 export function TutorCard({ metrics, challenge, onOpen }: { metrics: SimulationMetrics; challenge: boolean; onOpen: () => void }) {
   return <section className="panel tutor-card">
@@ -16,7 +16,7 @@ export function TutorCard({ metrics, challenge, onOpen }: { metrics: SimulationM
   </section>;
 }
 
-interface Message { id: number; role: 'user' | 'tutor'; text: string; tick: number; provider?: 'gemini' | 'offline'; sources?: TutorSource[]; error?: string }
+interface Message { id: number; role: 'user' | 'tutor'; text: string; tick: number; provider?: 'gemini' | 'offline' | 'error'; sources?: TutorSource[]; error?: string; fallback?: string }
 interface Props { open: boolean; onClose: () => void; config: SimulationConfig; metrics: SimulationMetrics; tick: number; mode: Mode }
 
 export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props) {
@@ -24,6 +24,7 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
   const [messages, setMessages] = useState<Record<Mode, Message[]>>({ sandbox: [], challenge: [] });
   const [hintLevel, setHintLevel] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [connection, setConnection] = useState('Checking tutor connection…');
   const requestRef = useRef<AbortController | null>(null);
   const messageId = useRef(0);
   const endRef = useRef<HTMLDivElement>(null);
@@ -34,6 +35,14 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
   useEffect(() => { setQuestion(''); requestRef.current?.abort(); setLoading(false); }, [mode]);
   useEffect(() => () => { requestRef.current?.abort(); }, []);
   useEffect(() => { if (!open) { requestRef.current?.abort(); setLoading(false); } }, [open]);
+  useEffect(() => {
+    if(!open) return;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(()=>controller.abort('timeout'),4000);
+    setConnection('Checking tutor connection…');
+    getTutorHealth(controller.signal).then(setConnection).catch(error=>{if(controller.signal.reason==='timeout')setConnection('Tutor API health check timed out. Restart the app with npm run dev.');else if(!controller.signal.aborted)setConnection(error instanceof Error?error.message:'Tutor API unavailable.');}).finally(()=>window.clearTimeout(timeout));
+    return ()=>{controller.abort();window.clearTimeout(timeout);};
+  },[open]);
   if (!open) return null;
   async function ask(value: string) {
     const text = value.trim();
@@ -49,15 +58,17 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
     setQuestion('');
     const timer = window.setTimeout(() => controller.abort('timeout'), 18000);
     try {
-      const result = await requestTutorAnswer({question:text,messages:currentMessages.slice(-12).map(message=>({role:message.role === 'user' ? 'user' : 'assistant',text:message.text})),config:{...config},metrics:{...metrics},tick,mode:capturedMode,hintLevel:Math.min(hintLevel,1000)},controller.signal);
+      const result = await requestTutorAnswer({question:text,messages:currentMessages.filter(message=>message.provider!=='error').slice(-12).map(message=>({role:message.role === 'user' ? 'user' : 'assistant',text:message.text})),config:{...config},metrics:{...metrics},tick,mode:capturedMode,hintLevel:Math.min(hintLevel,1000)},controller.signal);
       if (controller.signal.aborted) return;
       const id = ++messageId.current;
+      setConnection('Gemini connected · retrieval ready');
       setMessages(previous => ({...previous,[capturedMode]:[...previous[capturedMode],{id,role:'tutor',text:result.answer,tick,provider:'gemini',sources:result.sources}].slice(-40) as Message[]}));
     } catch (error) {
       if (controller.signal.aborted && controller.signal.reason !== 'timeout') return;
       const id = ++messageId.current;
       const message = controller.signal.reason === 'timeout' ? 'The AI tutor timed out.' : error instanceof Error ? error.message : 'The AI tutor is unavailable.';
-      setMessages(previous => ({...previous,[capturedMode]:[...previous[capturedMode],{id,role:'tutor',text:fallback,tick,provider:'offline',error:message}].slice(-40) as Message[]}));
+      setConnection(message);
+      setMessages(previous => ({...previous,[capturedMode]:[...previous[capturedMode],{id,role:'tutor',text:'',fallback,tick,provider:'error',error:message}].slice(-40) as Message[]}));
     } finally {
       window.clearTimeout(timer);
       if (requestRef.current === controller) { requestRef.current = null; setLoading(false); }
@@ -67,10 +78,11 @@ export function CyberTutor({ open, onClose, config, metrics, tick, mode }: Props
   return <aside className="tutor-drawer" aria-label="Cyber Tutor" onKeyDown={event => { if (event.key === 'Escape') onClose(); }}>
     <div className="tutor-drawer-heading"><span className="tutor-avatar"><MessageCircle size={23} /></span><div><h2>Cyber Tutor</h2><span>Context from your {mode}</span></div><button className="icon-button" onClick={onClose} aria-label="Close Cyber Tutor"><X size={19} /></button></div>
     <div className="tutor-context"><span>Your current signals</span><b>{metrics.legitAvailabilityPercent.toFixed(1)}% availability</b><span>{tick}s</span></div>
+    <p className="tutor-connection" role="status">{connection}</p>
     <div className="tutor-conversation">
       <div className="tutor-welcome"><h3>Why is this happening?</h3><p>Ask about cybersecurity or your current experiment. Gemini uses local learning material and a snapshot of your simulation when the API is available. Otherwise, a clearly labeled offline guide helps.</p></div>
       <div className="question-chips">{(mode === 'challenge' ? ['Give me a hint', 'Why is my website slow?', 'What does the request queue mean?'] : suggestedQuestions).map(text => <button key={text} disabled={loading} onClick={() => { void ask(text); }}>{text}<ArrowRight size={12} /></button>)}</div>
-      <div className="messages" aria-live="polite" aria-relevant="additions" aria-busy={loading}>{currentMessages.map(message => <div key={message.id} className={`message ${message.role}`}><span>{message.role === 'tutor' ? message.provider === 'gemini' ? 'Gemini · AI tutor' : 'Offline guide' : 'You'} <small>· {message.tick}s</small></span>{message.error && <div className="tutor-api-notice">{message.error} Using offline explanations.</div>}<p>{message.text}</p>{!!message.sources?.length && <details className="tutor-sources"><summary>Learning sources</summary><ul>{message.sources.map(source=><li key={source.id}>[{source.id}] {source.title}</li>)}</ul></details>}</div>)}{loading && <p className="tutor-loading" role="status"><span className="loading-ring" />Thinking with your simulation snapshot…</p>}</div>
+      <div className="messages" aria-live="polite" aria-relevant="additions" aria-busy={loading}>{currentMessages.map(message => <div key={message.id} className={`message ${message.role}`}><span>{message.role === 'tutor' ? message.provider === 'gemini' ? 'Gemini · AI tutor' : message.provider === 'error' ? 'AI request failed' : 'Offline guide' : 'You'} <small>· {message.tick}s</small></span>{message.error && <div className="tutor-api-notice">{message.error}</div>}{message.text && <p>{message.text}</p>}{message.provider==='error' && <button className="text-button" onClick={()=>setMessages(previous=>({...previous,[mode]:previous[mode].map(item=>item.id===message.id?{...item,provider:'offline',text:item.fallback??'',error:undefined}:item)}))}>Use offline explanation</button>}{!!message.sources?.length && <details className="tutor-sources"><summary>Learning sources</summary><ul>{message.sources.map(source=><li key={source.id}>[{source.id}] {source.title}</li>)}</ul></details>}</div>)}{loading && <p className="tutor-loading" role="status"><span className="loading-ring" />Thinking with your simulation snapshot…</p>}</div>
       <div ref={endRef} />
     </div>
     <form className="tutor-form" onSubmit={event => { event.preventDefault(); void ask(question); }}><label className="sr-only" htmlFor="tutor-question">Ask Cyber Tutor</label><input ref={inputRef} id="tutor-question" placeholder="Ask about your network…" value={question} maxLength={1000} onChange={event => setQuestion(event.target.value)} /><button type="submit" disabled={loading || !question.trim()} aria-label="Send question"><Send size={17} /></button></form>
